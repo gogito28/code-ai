@@ -3,9 +3,67 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Code AI</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <h1>🤖 Code AI</h1>
-  <p>Your personal coding assistant.</p>
+  <div class="container">
+    <h1>🤖 Code AI</h1>
+
+    <div id="chat">
+      <div class="message ai">
+        Yo 👋 I'm Code AI. Ask me to write, explain, debug, or improve code.
+      </div>
+    </div>
+
+    <div class="input-area">
+      <textarea id="prompt" rows="3"
+        placeholder="Ask me about code..."></textarea>
+
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("prompt");
+      const chat = document.getElementById("chat");
+
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      chat.innerHTML += `
+        <div class="message user">${message}</div>
+      `;
+
+      input.value = "";
+
+      chat.innerHTML += `
+        <div class="message ai" id="loading">Thinking... 🤔</div>
+      `;
+
+      try {
+        const response = await fetch("/.netlify/functions/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("loading").textContent =
+          data.reply || "Something went wrong.";
+          
+      } catch (error) {
+        document.getElementById("loading").textContent =
+          "Couldn't connect to Code AI.";
+      }
+    }
+  </script>
 </body>
 </html>
